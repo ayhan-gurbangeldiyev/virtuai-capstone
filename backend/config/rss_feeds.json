@@ -1,0 +1,464 @@
+[
+  {
+    "source": "OpenAI Blog",
+    "url": "https://openai.com/blog/rss.xml",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-06",
+    "notes": "Official OpenAI blog, product announcements & research",
+    "tier": 1,
+    "vip": true
+  },
+  {
+    "source": "Google AI Blog",
+    "url": "https://blog.google/technology/ai/rss/",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-05",
+    "notes": "Google's AI announcements and research",
+    "tier": 1,
+    "vip": true
+  },
+  {
+    "source": "Google DeepMind Blog",
+    "url": "https://deepmind.google/blog/rss.xml",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-01-29",
+    "notes": "DeepMind research and announcements",
+    "tier": 1,
+    "vip": true
+  },
+  {
+    "source": "Microsoft Research",
+    "url": "https://www.microsoft.com/en-us/research/feed/",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-05",
+    "notes": "Microsoft Research blog, AI and CS research",
+    "tier": 1
+  },
+  {
+    "source": "Hugging Face Blog",
+    "url": "https://huggingface.co/blog/feed.xml",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-05",
+    "notes": "Open-source AI models, tools, tutorials",
+    "tier": 1
+  },
+  {
+    "source": "NVIDIA AI Blog",
+    "url": "https://blogs.nvidia.com/feed/",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-05",
+    "notes": "NVIDIA AI, GPU, deep learning news",
+    "tier": 1
+  },
+  {
+    "source": "Simon Willison's Weblog",
+    "url": "https://simonwillison.net/atom/everything/",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-08",
+    "notes": "Excellent AI tools coverage, LLM insights, developer perspective",
+    "tier": 2
+  },
+  {
+    "source": "Import AI Newsletter",
+    "url": "https://importai.substack.com/feed",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Weekly AI newsletter by Jack Clark (Anthropic co-founder)",
+    "tier": 1
+  },
+  {
+    "source": "Last Week in AI",
+    "url": "https://lastweekin.ai/feed",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-06",
+    "notes": "Weekly AI news digest",
+    "tier": 1
+  },
+  {
+    "source": "The Decoder",
+    "url": "https://the-decoder.com/feed/",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-08",
+    "notes": "AI news, focused on LLMs and generative AI",
+    "tier": 1
+  },
+  {
+    "source": "Towards AI",
+    "url": "https://pub.towardsai.net/feed",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "AI tutorials, news, research summaries on Medium",
+    "tier": 2
+  },
+  {
+    "source": "Machine Learning Mastery",
+    "url": "https://machinelearningmastery.com/feed/",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "ML tutorials and practical guides",
+    "tier": 2
+  },
+  {
+    "source": "Lil'Log (Lilian Weng)",
+    "url": "https://lilianweng.github.io/index.xml",
+    "category": "AI",
+    "status": "active",
+    "last_post": "2025-05-01",
+    "notes": "Deep technical AI blog posts by OpenAI researcher, infrequent but high quality",
+    "tier": 2
+  },
+  {
+    "source": "TechCrunch",
+    "url": "https://techcrunch.com/feed/",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Major tech news, startups, funding rounds",
+    "tier": 1
+  },
+  {
+    "source": "The Verge",
+    "url": "https://www.theverge.com/rss/index.xml",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Consumer tech, policy, culture",
+    "tier": 1
+  },
+  {
+    "source": "Ars Technica",
+    "url": "https://feeds.arstechnica.com/arstechnica/index",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-08",
+    "notes": "In-depth tech, science, policy coverage",
+    "tier": 1
+  },
+  {
+    "source": "Wired",
+    "url": "https://www.wired.com/feed/rss",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Technology, science, culture, business",
+    "tier": 1
+  },
+  {
+    "source": "MIT Technology Review",
+    "url": "https://www.technologyreview.com/feed/",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Emerging technology analysis and impact",
+    "tier": 1
+  },
+  {
+    "source": "Engadget",
+    "url": "https://www.engadget.com/rss.xml",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Consumer electronics, gadgets, tech news",
+    "tier": 2
+  },
+  {
+    "source": "The Information",
+    "url": "https://www.theinformation.com/feed",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Premium tech business journalism (some content paywalled)",
+    "tier": 2
+  },
+  {
+    "source": "VentureBeat",
+    "url": "https://venturebeat.com/feed/",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "AI and enterprise tech focus",
+    "tier": 1
+  },
+  {
+    "source": "ZDNet",
+    "url": "https://www.zdnet.com/news/rss.xml",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Enterprise tech, reviews, how-tos",
+    "tier": 2
+  },
+  {
+    "source": "Hacker News (Front Page)",
+    "url": "https://hnrss.org/frontpage",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Y Combinator's Hacker News front page via hnrss.org",
+    "tier": 2
+  },
+  {
+    "source": "Lobsters",
+    "url": "https://lobste.rs/rss",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Community-driven tech link aggregator, high signal",
+    "tier": 2
+  },
+  {
+    "source": "Platformer",
+    "url": "https://www.platformer.news/rss/",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-06",
+    "notes": "Big tech platform news by Casey Newton",
+    "tier": 2
+  },
+  {
+    "source": "404 Media",
+    "url": "https://www.404media.co/rss/",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Independent tech journalism, investigations",
+    "tier": 2
+  },
+  {
+    "source": "Rest of World",
+    "url": "https://restofworld.org/feed/",
+    "category": "Tech",
+    "status": "active",
+    "last_post": "2026-01-13",
+    "notes": "Tech coverage outside Silicon Valley, global perspective",
+    "tier": 2
+  },
+  {
+    "source": "GitHub Blog",
+    "url": "https://github.blog/feed/",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-05",
+    "notes": "GitHub product updates, engineering, open source",
+    "tier": 1
+  },
+  {
+    "source": "Stack Overflow Blog",
+    "url": "https://stackoverflow.blog/feed/",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-06",
+    "notes": "Developer trends, engineering culture",
+    "tier": 2
+  },
+  {
+    "source": "Dev.to",
+    "url": "https://dev.to/feed",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Community developer articles, tutorials",
+    "tier": 2
+  },
+  {
+    "source": "CSS-Tricks",
+    "url": "https://css-tricks.com/feed/",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-05",
+    "notes": "Web development tips and tutorials",
+    "tier": 2
+  },
+  {
+    "source": "Smashing Magazine",
+    "url": "https://www.smashingmagazine.com/feed/",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-05",
+    "notes": "Web design and development",
+    "tier": 2
+  },
+  {
+    "source": "Martin Fowler",
+    "url": "https://martinfowler.com/feed.atom",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-05",
+    "notes": "Software architecture, best practices",
+    "tier": 2
+  },
+  {
+    "source": "Changelog",
+    "url": "https://changelog.com/feed",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-06",
+    "notes": "Open source news, developer podcasts",
+    "tier": 2
+  },
+  {
+    "source": "freeCodeCamp",
+    "url": "https://www.freecodecamp.org/news/rss/",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-06",
+    "notes": "Programming tutorials, web dev",
+    "tier": 2
+  },
+  {
+    "source": "AWS Blog",
+    "url": "https://aws.amazon.com/blogs/aws/feed/",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-04",
+    "notes": "AWS product updates and cloud engineering",
+    "tier": 2
+  },
+  {
+    "source": "Vercel Blog",
+    "url": "https://vercel.com/atom",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Next.js, frontend, deployment",
+    "tier": 1
+  },
+  {
+    "source": "Cloudflare Blog",
+    "url": "https://blog.cloudflare.com/rss/",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-02-05",
+    "notes": "Infrastructure, security, edge computing",
+    "tier": 1
+  },
+  {
+    "source": "Netflix Tech Blog",
+    "url": "https://netflixtechblog.com/feed",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-01-26",
+    "notes": "Engineering at scale, distributed systems",
+    "tier": 2
+  },
+  {
+    "source": "Spotify Engineering",
+    "url": "https://engineering.atspotify.com/feed/",
+    "category": "Developer",
+    "status": "active",
+    "last_post": "2026-01-22",
+    "notes": "ML, data engineering, platform engineering",
+    "tier": 2
+  },
+  {
+    "source": "Sequoia Capital",
+    "url": "https://www.sequoiacap.com/feed/",
+    "category": "Startup",
+    "status": "active",
+    "last_post": "2026-02-02",
+    "notes": "VC perspectives, startup advice",
+    "tier": 2
+  },
+  {
+    "source": "Y Combinator Blog",
+    "url": "https://www.ycombinator.com/blog/rss/",
+    "category": "Startup",
+    "status": "active",
+    "last_post": "2026-02-05",
+    "notes": "YC news, startup advice",
+    "tier": 2
+  },
+  {
+    "source": "Paul Graham Essays",
+    "url": "http://www.aaronsw.com/2002/feeds/pgessays.rss",
+    "category": "Startup",
+    "status": "active",
+    "last_post": "2026-02-01",
+    "notes": "Influential startup/tech essays, infrequent",
+    "tier": 2
+  },
+  {
+    "source": "Stratechery",
+    "url": "https://stratechery.com/feed/",
+    "category": "Startup",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Tech strategy analysis by Ben Thompson (some paywalled)",
+    "tier": 2
+  },
+  {
+    "source": "Benedict Evans",
+    "url": "https://www.ben-evans.com/benedictevans?format=rss",
+    "category": "Startup",
+    "status": "active",
+    "last_post": "2025-11-23",
+    "notes": "Tech/mobile industry analysis, infrequent but insightful",
+    "tier": 2
+  },
+  {
+    "source": "SaaStr",
+    "url": "https://www.saastr.com/feed/",
+    "category": "Startup",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "SaaS business, growth, fundraising",
+    "tier": 2
+  },
+  {
+    "source": "Product Hunt",
+    "url": "https://www.producthunt.com/feed",
+    "category": "Startup",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "New product launches daily",
+    "tier": 2
+  },
+  {
+    "source": "Webrazzi",
+    "url": "https://webrazzi.com/feed/",
+    "category": "Turkish",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Türkiye'nin önde gelen teknoloji haber sitesi",
+    "tier": 1
+  },
+  {
+    "source": "ShiftDelete.Net",
+    "url": "https://shiftdelete.net/feed",
+    "category": "Turkish",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Türkçe teknoloji haberleri",
+    "tier": 2
+  },
+  {
+    "source": "Technopat",
+    "url": "https://www.technopat.net/feed/",
+    "category": "Turkish",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Türkçe teknoloji haberleri ve incelemeler",
+    "tier": 2
+  },
+  {
+    "source": "Chip Online TR",
+    "url": "https://www.chip.com.tr/rss/",
+    "category": "Turkish",
+    "status": "active",
+    "last_post": "2026-02-09",
+    "notes": "Türkçe teknoloji haberleri",
+    "tier": 2
+  }
+]

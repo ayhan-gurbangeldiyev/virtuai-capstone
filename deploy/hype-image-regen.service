@@ -1,0 +1,23 @@
+[Unit]
+Description=Hype Crew Image Regen Queue Worker (Phase 28.R-Lite Sprint 1B)
+After=network-online.target contentfactory.service
+Wants=network-online.target
+# V2 backlog #2 — disable systemd's restart-rate-limit so a long-running
+# Wiro pipeline (up to 4 min for slow Seedream calls) doesn't trip the
+# "start-limit hit" guard and disable the timer permanently.
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+# V2 backlog #2 — flock prevents two worker processes from racing on the
+# queue if systemd ever double-fires us. Worker also uses optimistic
+# locking via claim_job, but flock is cheap belt-and-braces.
+ExecStart=/usr/bin/flock -n /var/lock/hype-image-regen.lock /opt/hype-crew/venv/bin/python -m scripts.process_image_regen_queue --once
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=1800
+
+[Install]
+WantedBy=multi-user.target

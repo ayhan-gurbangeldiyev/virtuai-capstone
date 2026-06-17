@@ -1,0 +1,15 @@
+# DISABLED - Replaced by rss-fetcher.yml (Type Hype Pipeline Faz 2)
+# This workflow used the old n8n webhook approach.
+# Keeping file to preserve git history; schedule removed to prevent execution.
+name: "[DISABLED] Content Factory (Legacy)"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    if: false  # Never run
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "This workflow is disabled"

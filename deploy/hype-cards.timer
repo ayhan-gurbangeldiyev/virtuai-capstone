@@ -1,0 +1,11 @@
+[Unit]
+Description=Hype Cards — günlük kurak-gün kontrolü (08:00 İstanbul)
+
+[Timer]
+# 05:00 UTC = 08:00 İstanbul — kurak ise günün prime slotlarını (11/14/17/20 İst) öne zamanlar
+OnCalendar=*-*-* 05:00:00 UTC
+Persistent=true
+RandomizedDelaySec=180
+
+[Install]
+WantedBy=timers.target

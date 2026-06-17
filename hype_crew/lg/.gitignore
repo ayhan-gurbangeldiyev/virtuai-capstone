@@ -1,0 +1,3 @@
+# Dev/spike SQLite checkpoint store — commit edilmez (prod PostgresSaver kullanır)
+_checkpoints_dev.sqlite
+_checkpoints_dev.sqlite-*

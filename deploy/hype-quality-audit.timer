@@ -1,0 +1,15 @@
+[Unit]
+Description=Monthly Quality Audit on 1st at 09:00 UTC (Phase 43.D)
+Requires=hype-quality-audit.service
+
+[Timer]
+# 09:00 UTC on the 1st of every month. AccuracySec=10min so the audit
+# can drift a few minutes if other jobs are competing for CPU at that
+# exact wall-clock time.
+OnCalendar=*-*-01 09:00:00
+Persistent=true
+AccuracySec=10min
+Unit=hype-quality-audit.service
+
+[Install]
+WantedBy=timers.target

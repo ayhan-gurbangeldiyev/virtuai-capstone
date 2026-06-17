@@ -1,0 +1,13 @@
+[Unit]
+Description=Shadow-mode graduation-readiness scoreboard + circuit breaker
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+ExecStart=/opt/hype-crew/venv/bin/python scripts/shadow_graduation.py
+ExecStart=/opt/hype-crew/venv/bin/python scripts/shadow_circuit_breaker.py
+StandardOutput=journal
+StandardError=journal

@@ -1,0 +1,14 @@
+[Unit]
+Description=Daily AI supply-health audit (last 24h tweet_feed coverage)
+After=network-online.target
+
+[Timer]
+# 05:15 UTC daily — runs AFTER the 00/04 trend-fetch cycles have
+# settled, BEFORE the operator's morning approval session. Persistent
+# so a missed run after reboot still fires.
+OnCalendar=*-*-* 05:15:00 UTC
+Persistent=true
+AccuracySec=1m
+
+[Install]
+WantedBy=timers.target

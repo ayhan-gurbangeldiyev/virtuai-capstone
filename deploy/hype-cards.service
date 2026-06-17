@@ -1,0 +1,22 @@
+[Unit]
+Description=Hype Cards — SÖZLÜK/SENCE? kurak-gün kartları
+# crash-loop freni (hype-crew.service paterni)
+StartLimitIntervalSec=600
+StartLimitBurst=3
+After=network-online.target contentfactory.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+ExecStartPre=/opt/hype-crew/venv/bin/python -m scripts.smoke_test_flow
+ExecStart=/opt/hype-crew/venv/bin/python -m runner --mode cards-dry-day
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=1800
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

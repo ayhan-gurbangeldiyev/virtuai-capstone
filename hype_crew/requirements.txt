@@ -1,0 +1,59 @@
+crewai>=0.86.0
+crewai-tools>=0.40.0
+pydantic>=2.10
+supabase>=2.27
+openai>=2.17
+httpx>=0.27
+python-dotenv>=1.2
+loguru>=0.7
+pytest>=8.0
+Pillow>=10.0
+# tts_normalize — Turkish number→words safety net for video narration
+# (cansu_video_v2). Catches leaked digits/%/$ before MiniMax TTS.
+num2words>=0.5.14
+# Faithfulness gate T0 — real NER + fuzzy match. PR #34 made these load-
+# bearing for recall=1.0; the curated dict alone misses entity
+# substitutions like Apple Intelligence vs Gemini.
+gliner>=0.2.20
+rapidfuzz>=3.0
+transformers>=4.40
+sentencepiece>=0.2
+# Persona-gate L4 semantic recall rescue (A2). Paraphrase-multilingual-MiniLM-L12-v2
+# is ~118 MB, CPU-only, TR+EN. Lazy-loaded on first ambiguous trend.
+sentence-transformers>=2.7.0
+
+# LangGraph durability/resume (Faz 0+). Tutarlı set (pip check temiz, 2026-06):
+# langgraph 1.2.x <-> checkpoint 4.1.x <-> postgres/sqlite saver 3.1.x.
+# Prod checkpoint = Supabase Postgres (langgraph şeması, session pooler);
+# dev/spike = lokal SQLite (HYPE_CHECKPOINT_DB_URL boşsa). CrewAI yolu korunur;
+# langgraph_enabled flag açıkken devreye girer.
+langgraph>=1.2,<2.0
+langgraph-checkpoint-postgres>=3.1,<4.0
+langgraph-checkpoint-sqlite>=3.1,<4.0
+psycopg[binary,pool]>=3.2
+
+# Katman B — Phoenix/OpenInference gözlemlenebilirlik (observe-only, flag-gated:
+# PHOENIX_TRACING_ENABLED, default OFF → no-op; obs.py register(auto_instrument)).
+# ÇÖZÜLDÜ (Seçenek a): phoenix/openinference otel'i PIN'lemiyor (üst-sınır yok); ilk
+# "otel ~1.42 çekiliyor" sorunu yalnız opentelemetry-exporter-otlp META-paketinin default
+# en-yeniye tırmanmasıydı. Çözüm = otel ailesini crewai'nin pin'i (~1.34) + exporter-otlp'yi
+# 1.34.1'e SABİTLE → pip backtrack yapmaz, crewai 1.14.4'e DOKUNULMAZ. pip --dry-run ile
+# çakışmasız doğrulandı (2 bağımsız sub-agent). Tüm openinference instrumentor'ları
+# (crewai/langchain/openai) auto_instrument=True ile otomatik açılır.
+opentelemetry-api~=1.34.0
+opentelemetry-sdk~=1.34.0
+opentelemetry-exporter-otlp-proto-http~=1.34.0
+opentelemetry-exporter-otlp==1.34.1          # backtrack-guard: meta-paket en-yeniye tırmanmasın
+arize-phoenix-otel==0.16.1
+openinference-instrumentation==0.1.53
+openinference-semantic-conventions==0.1.30
+openinference-instrumentation-openai==0.1.52
+openinference-instrumentation-crewai==1.1.9
+openinference-instrumentation-langchain==0.1.66
+
+# LiteLLM Router (kırılganlık fix) — direct LLM çağrılarını tek arayüzde birleştirir
+# (uniform timeout+retry+cooldown/devre-kesici + gerçek cost/latency). crewai 1.14 kendi
+# LLM'ini kullanır (litellm DEĞİL) → AYRI bağımlılık. Flag'li (HYPE_LITELLM_ROUTER_ENABLED,
+# default OFF). 1.80.0'a pinli (backend ile aynı; openai 2.x uyumlu; risk-agent versiyon-drift
+# uyarısı → exact pin). prod pip --dry-run crewai/langgraph/openai ile çakışmasız doğrulandı.
+litellm==1.80.0

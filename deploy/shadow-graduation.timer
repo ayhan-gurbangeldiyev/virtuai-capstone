@@ -1,0 +1,30 @@
+[Unit]
+Description=Run shadow-graduation + circuit-breaker (canary cadence)
+
+[Timer]
+# 2026-06-07 — canary cadence. Once Berkay flips auto_publish_enabled,
+# the breaker checks twice an hour (at :15 and :45) so a gate ERROR or
+# human-override spike gets caught fast. Persistent so missed slots
+# (reboot, deploy) fire on next boot.
+#
+# IMPORTANT — load-bearing caveat (B2):
+#   The block-rate σ-band check inside shadow_circuit_breaker uses a
+#   30-day window vs the last 24h. At Cansu's canary volume (≤3
+#   posts/day) the 24h denominator is too small for the σ test to
+#   carry signal — it will neither fire spuriously nor on a real
+#   collapse. During canary the LOAD-BEARING controls are:
+#     1. publish-time gate fail-closed (HARD_BLOCK and ERROR)
+#     2. verify_publish per-platform write-back (PR #47)
+#     3. 100% human post-hoc review of the previous day's drafts
+#   The breaker is still useful for the gate_errored (>0) and
+#   human_override (>15%) checks — those don't depend on σ.
+#
+# Post-canary, after the ramp completes and daily volume is >=10
+# posts, switch back to the OnCalendar=04:00:00 nightly cadence
+# (or further tighten as needed).
+OnCalendar=*:15
+OnCalendar=*:45
+Persistent=true
+
+[Install]
+WantedBy=timers.target

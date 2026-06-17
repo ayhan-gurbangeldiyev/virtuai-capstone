@@ -1,0 +1,12 @@
+[Unit]
+Description=Trigger Image Regen Queue Worker every 30 seconds
+Requires=hype-image-regen.service
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=30
+AccuracySec=5
+Unit=hype-image-regen.service
+
+[Install]
+WantedBy=timers.target

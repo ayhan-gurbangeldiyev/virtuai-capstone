@@ -1,0 +1,17 @@
+[Unit]
+Description=Hype Crew Monthly Quality Audit (Phase 43.D)
+After=network-online.target contentfactory.service
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+ExecStart=/usr/bin/flock -n /var/lock/hype-quality-audit.lock /opt/hype-crew/venv/bin/python -m scripts.quality_audit
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target

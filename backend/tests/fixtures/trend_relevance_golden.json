@@ -1,0 +1,65 @@
+[
+  {
+    "label": "ai_api_launch",
+    "topic": "OpenAI launched GPT-5 API for developers",
+    "summary": "OpenAI yeni GPT-5 API erişimini duyurdu ve geliştiriciler için entegrasyon dökümanını yayınladı.",
+    "keywords": ["openai", "gpt-5", "api", "developer"],
+    "expected": true
+  },
+  {
+    "label": "anthropic_sdk_release",
+    "topic": "Anthropic released Claude Code SDK",
+    "summary": "Yeni SDK ile ajan orkestrasyonu ve inference yönetimi kolaylaştı.",
+    "keywords": ["anthropic", "sdk", "agent", "inference"],
+    "expected": true
+  },
+  {
+    "label": "startup_funding",
+    "topic": "AI startup raises Series A funding for creator tools",
+    "summary": "Creator economy odaklı startup yeni funding turunu tamamladı.",
+    "keywords": ["startup", "series a", "creator economy", "funding"],
+    "expected": true
+  },
+  {
+    "label": "benchmark_news",
+    "topic": "New LLM benchmark shows SOTA jump",
+    "summary": "Bağımsız benchmark raporu model kalitesinde belirgin sıçrama gösterdi.",
+    "keywords": ["llm", "benchmark", "sota", "model"],
+    "expected": true
+  },
+  {
+    "label": "dubai_airport",
+    "topic": "Dubai Uluslararası Havalimanı yeni terminal açtı",
+    "summary": "Yolcu kapasitesi artırıldı ve uçuş trafiği düzenlendi.",
+    "keywords": ["dubai", "havalimanı", "uçuş"],
+    "expected": false
+  },
+  {
+    "label": "football_match",
+    "topic": "Galatasaray derbide kritik maça çıkıyor",
+    "summary": "Maç kadrosu ve son dakika gelişmeleri paylaşıldı.",
+    "keywords": ["futbol", "maç", "spor"],
+    "expected": false
+  },
+  {
+    "label": "celebrity_gossip",
+    "topic": "Ünlü oyuncu yeni dizi projesini duyurdu",
+    "summary": "Magazin gündeminde celebrity açıklaması konuşuluyor.",
+    "keywords": ["celebrity", "dizi", "magazin"],
+    "expected": false
+  },
+  {
+    "label": "hawaii_substring_trap",
+    "topic": "Hawaii turizm festivali başlıyor",
+    "summary": "Festival programı açıklandı ve biletler satışa çıktı.",
+    "keywords": ["hawaii", "turizm", "festival"],
+    "expected": false
+  },
+  {
+    "label": "election_campaign",
+    "topic": "Yerel seçim kampanyasında yeni vaatler",
+    "summary": "Seçim gündemi parti açıklamalarıyla yoğunlaştı.",
+    "keywords": ["seçim", "politika", "kampanya"],
+    "expected": false
+  }
+]

@@ -1,0 +1,136 @@
+{
+  "project_name": "ContentFactory",
+  "design_philosophy": {
+    "name": "ContentOS Dark",
+    "description": "A high-performance, dark-themed content generation dashboard focused on focus, clarity, and AI power. Turkish language first.",
+    "emotional_tone": "Professional, Futuristic, Efficient, Creative",
+    "visual_style": "Dark Mode, High Contrast, Bento Grids, Neon Accents"
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Outfit, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-4xl font-bold tracking-tight",
+      "h2": "text-3xl font-semibold tracking-tight",
+      "h3": "text-2xl font-semibold",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm text-muted-foreground"
+    }
+  },
+  "colors": {
+    "theme": "dark",
+    "palette": {
+      "background": "#09090b",
+      "foreground": "#fafafa",
+      "card": "#121214",
+      "card_foreground": "#ffffff",
+      "border": "#27272a",
+      "primary": "#ffffff",
+      "primary_foreground": "#09090b",
+      "muted": "#27272a",
+      "muted_foreground": "#a1a1aa"
+    },
+    "modules": {
+      "youtube": {
+        "primary": "#FF0000",
+        "background": "#280505",
+        "border": "#5c0a0a"
+      },
+      "instagram": {
+        "gradient": "linear-gradient(45deg, #833AB4, #FD1D1D, #F77737)",
+        "text": "#E1306C"
+      },
+      "tiktok": {
+        "primary": "#00f2ea",
+        "secondary": "#ff0050",
+        "background": "#051a1a"
+      },
+      "linkedin": {
+        "primary": "#0077b5",
+        "background": "#001a29"
+      },
+      "x_ai": {
+        "primary": "#1DA1F2",
+        "background": "#081824"
+      }
+    }
+  },
+  "layout": {
+    "structure": "Sidebar Navigation (Left, 280px) + Main Content Area (Fluid)",
+    "grid_system": "Bento Grid (CSS Grid)",
+    "spacing": {
+      "container_padding": "p-8",
+      "card_padding": "p-6",
+      "gap": "gap-6"
+    },
+    "sidebar": {
+      "width": "w-[280px]",
+      "background": "bg-card",
+      "border": "border-r border-border"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-white text-black hover:bg-gray-200 rounded-full px-8 py-6 font-medium transition-all",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg",
+      "ghost": "hover:bg-accent hover:text-accent-foreground"
+    },
+    "cards": {
+      "style": "bg-card border border-border rounded-xl shadow-sm hover:border-primary/20 transition-colors",
+      "hover_effect": "hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+    },
+    "inputs": {
+      "style": "bg-background border-input focus:ring-2 focus:ring-primary/20 rounded-lg h-12"
+    },
+    "navigation": {
+      "item_style": "flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors",
+      "active_style": "bg-accent text-foreground font-medium"
+    }
+  },
+  "assets": {
+    "images": {
+      "user_avatar": "https://images.pexels.com/photos/3228830/pexels-photo-3228830.jpeg",
+      "backgrounds": {
+        "abstract_red": "https://images.unsplash.com/photo-1760224254191-16a7cf659ad1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRhcmslMjB0ZWNobm9sb2d5JTIwYmFja2dyb3VuZCUyMGdyYWRpZW50fGVufDB8fHx8MTc2OTUyMzIyN3ww&ixlib=rb-4.1.0&q=85",
+        "abstract_blue": "https://images.unsplash.com/photo-1760224255354-77b8d96df876?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzJ8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGRhcmslMjB0ZWNobm9sb2d5JTIwYmFja2dyb3VuZCUyMGdyYWRpZW50fGVufDB8fHx8MTc2OTUyMzIyN3ww&ixlib=rb-4.1.0&q=85"
+      },
+      "placeholders": {
+        "social_3d": "https://images.unsplash.com/photo-1694109016554-9a52bff4e9f1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwxfHwzZCUyMHNvY2lhbCUyMG1lZGlhJTIwaWNvbnMlMjBmbG9hdGluZ3xlbnwwfHx8fDE3Njk1MjMyMjh8MA&ixlib=rb-4.1.0&q=85"
+      }
+    },
+    "icons": {
+      "library": "lucide-react",
+      "mapping": {
+        "dashboard": "LayoutGrid",
+        "x_ai": "Twitter",
+        "youtube": "Youtube",
+        "instagram": "Instagram",
+        "tiktok": "Video",
+        "linkedin": "Linkedin",
+        "settings": "Settings",
+        "blog": "FileText",
+        "link": "Link"
+      }
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. LANGUAGE: The entire UI must be in TURKISH. Use 'Başla' for Start, 'Ayarlar' for Settings, etc.",
+    "2. THEME: Force Dark Mode by default. Add 'dark' class to the root html element.",
+    "3. SIDEBAR: Create a persistent SidebarLayout component that wraps all pages.",
+    "4. MODULES: Each module (YouTube, X, etc.) must use its specific accent color for borders, active states, and icons.",
+    "5. PLACEHOLDERS: For placeholder pages (YouTube, Insta, etc.), create a 'ComingSoon' component that uses the module's accent color and a relevant 3D icon or abstract background.",
+    "6. X AI MODULE: This is the core feature. Implement the 4 tabs (Tweet, Quote, Reply, Article) as requested.",
+    "7. NO AUTH: Do not create login/signup pages. Direct user to Dashboard.",
+    "8. TESTING: Add data-testid to all interactive elements (buttons, inputs, tabs)."
+  ],
+  "universal_guidelines": [
+    "Use 'sonner' for toast notifications.",
+    "Use 'lucide-react' for icons.",
+    "Do not use gradients for text unless specified (like Instagram).",
+    "Ensure all inputs have a focus ring matching the module's accent color.",
+    "Use 'Outfit' font for headings to give a premium feel."
+  ]
+}

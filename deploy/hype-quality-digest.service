@@ -1,0 +1,16 @@
+[Unit]
+Description=Hype Crew Quality Health — daily digest push
+After=network-online.target contentfactory.service hype-crew.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+ExecStart=/opt/hype-crew/venv/bin/python -m scripts.check_quality_thresholds --digest
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target

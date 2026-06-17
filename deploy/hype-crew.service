@@ -1,0 +1,30 @@
+[Unit]
+Description=Hype Crew Autonomous Content Pipeline
+# D0-1: crash-loop freni (Restart=on-failure ile birlikte calisir)
+StartLimitIntervalSec=600
+StartLimitBurst=3
+After=network-online.target contentfactory.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+# Pre-flight smoke test — AST audit catches the NameError class that
+# crashed every cron 09-10 UTC on 2026-06-07 (PR #50 → FIX-1 →
+# regression). If this exits non-zero, systemd refuses to start
+# ExecStart and the cron skips this firing entirely.
+ExecStartPre=/opt/hype-crew/venv/bin/python -m scripts.smoke_test_flow
+ExecStart=/opt/hype-crew/venv/bin/python -m runner
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=1800
+# 2026-06-10 (otonomi D0-1) — crash/timeout saati sessizce yutmasin:
+# transient hata 30sn sonra yeniden denenir (systemd 255 oneshot Restart
+# destekler). StartLimit: 10dk'da en fazla 3 deneme (crash-loop freni);
+# siradaki saatlik timer zaten taze deneme yapar.
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

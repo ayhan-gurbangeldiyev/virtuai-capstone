@@ -1,0 +1,14 @@
+[Unit]
+Description=Hype Trend Fetch — paid Xquik fetch of AI source list + radar/monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/contentfactory/backend
+EnvironmentFile=/opt/contentfactory/backend/.env
+ExecStart=/opt/contentfactory/backend/venv/bin/python /opt/contentfactory/backend/scripts/run_trend_fetch.py
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=600

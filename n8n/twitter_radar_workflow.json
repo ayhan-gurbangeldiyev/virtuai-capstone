@@ -1,0 +1,273 @@
+{
+  "name": "Type Hype - Twitter Radar",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 4,8,12,16,20 * * *"
+            }
+          ]
+        }
+      },
+      "id": "01-schedule",
+      "name": "Schedule (5x/day)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 400]
+    },
+
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/twitter_watch_accounts",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "select", "value": "*" },
+            { "name": "active", "value": "eq.true" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "options": {
+          "response": { "response": { "responseFormat": "json" } }
+        }
+      },
+      "id": "02-fetch-accounts",
+      "name": "Fetch Watch Accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [260, 400]
+    },
+
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Hesapları 3 gruba ayır + search query'leri hazırla\nconst accounts = $input.all().map(i => i.json);\n\n// VIP: Tier 1-2, Global (AI labs + key people)\nconst vipAccounts = accounts.filter(a => (a.tier === 1 || a.tier === 2) && a.region !== 'TR');\nconst vipUsernames = vipAccounts.map(a => a.username);\n\n// TR: region=TR (haber, spor, tech)\nconst trAccounts = accounts.filter(a => a.region === 'TR');\nconst trUsernames = trAccounts.map(a => a.username);\n\n// VIP query batches (max 15 per query to avoid length limits)\nconst vipBatches = [];\nfor (let i = 0; i < vipUsernames.length; i += 15) {\n  vipBatches.push(vipUsernames.slice(i, i + 15).map(u => `from:${u}`).join(' OR '));\n}\n\nconst trBatches = [];\nfor (let i = 0; i < trUsernames.length; i += 15) {\n  trBatches.push(trUsernames.slice(i, i + 15).map(u => `from:${u}`).join(' OR '));\n}\n\n// Keyword queries (community buzz)\nconst keywordQueries = [\n  '\"just released\" (AI OR LLM OR model) min_faves:500',\n  '\"open source\" (model OR LLM OR AI) min_faves:500',\n  '\"announcing\" (from:AnthropicAI OR from:OpenAI OR from:GoogleDeepMind OR from:MistralAI OR from:MetaAI)',\n  '\"state of the art\" (benchmark OR SOTA) min_faves:300',\n  '(API OR SDK) launch (AI OR LLM) min_faves:500'\n];\n\n// Account lookup map\nconst accountMap = {};\nfor (const a of accounts) {\n  accountMap[a.username.toLowerCase()] = a;\n}\n\nconst batchId = crypto.randomUUID();\n\nconsole.log(`Accounts: ${accounts.length} total | VIP: ${vipUsernames.length} | TR: ${trUsernames.length}`);\nconsole.log(`Batches: VIP=${vipBatches.length} TR=${trBatches.length} KW=${keywordQueries.length}`);\n\nreturn [{ json: {\n  vipBatches,\n  trBatches,\n  keywordQueries,\n  accountMap,\n  batchId\n} }];"
+      },
+      "id": "03-prepare",
+      "name": "Prepare Search Groups",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 400]
+    },
+
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ═══ VIP Tweet Search (Tier 1-2 Global) ═══\n// Xquik async job: POST start → poll GET → paginate\n\nconst XQUIK_KEY = $env.XQUIK_API_KEY;\nconst BASE = 'https://xquik.com/api/v1';\nconst { vipBatches, batchId } = $input.first().json;\n\nasync function xquikSearch(query, limit) {\n  // 1. Start extraction\n  let job;\n  try {\n    job = await $helpers.httpRequest({\n      method: 'POST',\n      url: `${BASE}/extractions`,\n      headers: { 'x-api-key': XQUIK_KEY, 'Content-Type': 'application/json' },\n      body: { toolType: 'tweet_search_extractor', searchQuery: query, resultsLimit: limit }\n    });\n  } catch (e) { console.log('Start error:', e.message); return []; }\n\n  if (!job?.id) { console.log('No extraction ID:', JSON.stringify(job)); return []; }\n\n  // 2. Poll until completed (max 120s)\n  const start = Date.now();\n  let data = null;\n  while (Date.now() - start < 120000) {\n    try {\n      data = await $helpers.httpRequest({\n        method: 'GET',\n        url: `${BASE}/extractions/${job.id}`,\n        headers: { 'x-api-key': XQUIK_KEY }\n      });\n    } catch (e) { console.log('Poll error:', e.message); return []; }\n\n    const status = data?.job?.status || data?.status;\n    if (status === 'completed') break;\n    if (status === 'failed') { console.log('Job failed'); return []; }\n    await new Promise(r => setTimeout(r, 2000));\n  }\n  if (!data) return [];\n\n  // 3. Collect all pages\n  let results = data.results || [];\n  while (data?.hasMore && data?.nextCursor) {\n    try {\n      data = await $helpers.httpRequest({\n        method: 'GET',\n        url: `${BASE}/extractions/${job.id}`,\n        headers: { 'x-api-key': XQUIK_KEY },\n        qs: { after: data.nextCursor }\n      });\n      results = results.concat(data?.results || []);\n    } catch (e) { break; }\n  }\n  return results;\n}\n\n// Run all VIP batches\nlet allTweets = [];\nfor (let i = 0; i < vipBatches.length; i++) {\n  const tweets = await xquikSearch(vipBatches[i], 200);\n  allTweets = allTweets.concat(tweets);\n  console.log(`VIP batch ${i+1}/${vipBatches.length}: ${tweets.length} tweets`);\n  if (i < vipBatches.length - 1) await new Promise(r => setTimeout(r, 1000));\n}\n\nconsole.log(`VIP total: ${allTweets.length} tweets`);\nreturn [{ json: { tweets: allTweets, source: 'vip', batchId } }];"
+      },
+      "id": "04-vip-search",
+      "name": "Xquik VIP Search",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [820, 200],
+      "onError": "continueRegularOutput"
+    },
+
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ═══ TR Account Tweet Search ═══\n\nconst XQUIK_KEY = $env.XQUIK_API_KEY;\nconst BASE = 'https://xquik.com/api/v1';\nconst { trBatches, batchId } = $input.first().json;\n\nasync function xquikSearch(query, limit) {\n  let job;\n  try {\n    job = await $helpers.httpRequest({\n      method: 'POST',\n      url: `${BASE}/extractions`,\n      headers: { 'x-api-key': XQUIK_KEY, 'Content-Type': 'application/json' },\n      body: { toolType: 'tweet_search_extractor', searchQuery: query, resultsLimit: limit }\n    });\n  } catch (e) { console.log('Start error:', e.message); return []; }\n\n  if (!job?.id) return [];\n\n  const start = Date.now();\n  let data = null;\n  while (Date.now() - start < 120000) {\n    try {\n      data = await $helpers.httpRequest({\n        method: 'GET', url: `${BASE}/extractions/${job.id}`,\n        headers: { 'x-api-key': XQUIK_KEY }\n      });\n    } catch (e) { return []; }\n    const status = data?.job?.status || data?.status;\n    if (status === 'completed') break;\n    if (status === 'failed') return [];\n    await new Promise(r => setTimeout(r, 2000));\n  }\n  if (!data) return [];\n\n  let results = data.results || [];\n  while (data?.hasMore && data?.nextCursor) {\n    try {\n      data = await $helpers.httpRequest({\n        method: 'GET', url: `${BASE}/extractions/${job.id}`,\n        headers: { 'x-api-key': XQUIK_KEY }, qs: { after: data.nextCursor }\n      });\n      results = results.concat(data?.results || []);\n    } catch (e) { break; }\n  }\n  return results;\n}\n\nlet allTweets = [];\nfor (let i = 0; i < trBatches.length; i++) {\n  const tweets = await xquikSearch(trBatches[i], 200);\n  allTweets = allTweets.concat(tweets);\n  console.log(`TR batch ${i+1}/${trBatches.length}: ${tweets.length} tweets`);\n  if (i < trBatches.length - 1) await new Promise(r => setTimeout(r, 1000));\n}\n\nconsole.log(`TR total: ${allTweets.length} tweets`);\nreturn [{ json: { tweets: allTweets, source: 'tr', batchId } }];"
+      },
+      "id": "05-tr-search",
+      "name": "Xquik TR Search",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [820, 400],
+      "onError": "continueRegularOutput"
+    },
+
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ═══ Keyword Search (Community Buzz) ═══\n\nconst XQUIK_KEY = $env.XQUIK_API_KEY;\nconst BASE = 'https://xquik.com/api/v1';\nconst { keywordQueries, batchId } = $input.first().json;\n\nasync function xquikSearch(query, limit) {\n  let job;\n  try {\n    job = await $helpers.httpRequest({\n      method: 'POST',\n      url: `${BASE}/extractions`,\n      headers: { 'x-api-key': XQUIK_KEY, 'Content-Type': 'application/json' },\n      body: { toolType: 'tweet_search_extractor', searchQuery: query, resultsLimit: limit }\n    });\n  } catch (e) { console.log('Start error:', e.message); return []; }\n\n  if (!job?.id) return [];\n\n  const start = Date.now();\n  let data = null;\n  while (Date.now() - start < 120000) {\n    try {\n      data = await $helpers.httpRequest({\n        method: 'GET', url: `${BASE}/extractions/${job.id}`,\n        headers: { 'x-api-key': XQUIK_KEY }\n      });\n    } catch (e) { return []; }\n    const status = data?.job?.status || data?.status;\n    if (status === 'completed') break;\n    if (status === 'failed') return [];\n    await new Promise(r => setTimeout(r, 2000));\n  }\n  if (!data) return [];\n\n  let results = data.results || [];\n  while (data?.hasMore && data?.nextCursor) {\n    try {\n      data = await $helpers.httpRequest({\n        method: 'GET', url: `${BASE}/extractions/${job.id}`,\n        headers: { 'x-api-key': XQUIK_KEY }, qs: { after: data.nextCursor }\n      });\n      results = results.concat(data?.results || []);\n    } catch (e) { break; }\n  }\n  return results;\n}\n\nlet allTweets = [];\nfor (let i = 0; i < keywordQueries.length; i++) {\n  const tweets = await xquikSearch(keywordQueries[i], 20);\n  allTweets = allTweets.concat(tweets);\n  console.log(`KW ${i+1}/${keywordQueries.length} \"${keywordQueries[i].substring(0,30)}...\": ${tweets.length}`);\n  await new Promise(r => setTimeout(r, 2000));\n}\n\nconsole.log(`Keyword total: ${allTweets.length} tweets`);\nreturn [{ json: { tweets: allTweets, source: 'keyword', batchId } }];"
+      },
+      "id": "06-kw-search",
+      "name": "Xquik Keyword Search",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [820, 600],
+      "onError": "continueRegularOutput"
+    },
+
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {}
+      },
+      "id": "07-merge-vip-tr",
+      "name": "Merge VIP + TR",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1120, 300]
+    },
+
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {}
+      },
+      "id": "08-merge-all",
+      "name": "Merge All Tweets",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1370, 400]
+    },
+
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ═══ Normalize tweets → raw_signal format + URL dedup ═══\n\nconst inputs = $input.all().map(i => i.json);\nconst prepareData = $('Prepare Search Groups').first().json;\nconst accountMap = prepareData.accountMap || {};\nconst batchId = prepareData.batchId;\n\n// Collect all tweets from all branches\nlet allTweets = [];\nfor (const input of inputs) {\n  if (input.tweets && Array.isArray(input.tweets)) {\n    const source = input.source || 'unknown';\n    allTweets = allTweets.concat(input.tweets.map(t => ({ ...t, _source: source })));\n  }\n}\n\nconsole.log(`Raw tweets from all branches: ${allTweets.length}`);\n\nconst seen = new Set();\nconst signals = [];\nconst cutoffMs = Date.now() - (72 * 60 * 60 * 1000);\n\nfor (const tweet of allTweets) {\n  const tweetId = tweet.tweetId || tweet.id;\n  const username = tweet.xUsername || tweet.author?.userName || '';\n  const text = tweet.tweetText || tweet.text || '';\n\n  // Temel filtreler\n  if (!tweetId || !text) continue;\n  if (text.startsWith('RT @')) continue;\n  if (text.split(/\\s+/).length < 4) continue;\n\n  // URL dedup\n  const url = `https://x.com/${username}/status/${tweetId}`;\n  if (seen.has(url)) continue;\n  seen.add(url);\n\n  // Yaş filtresi (72h)\n  const rawDate = tweet.tweetCreatedAt || tweet.createdAt;\n  if (rawDate) {\n    try { if (new Date(rawDate).getTime() < cutoffMs) continue; } catch (e) {}\n  }\n\n  // Hesap bilgisi\n  const accInfo = accountMap[username.toLowerCase()] || {};\n  let sourceName = 'twitter_keyword';\n  if (tweet._source === 'vip') sourceName = accInfo.tier === 1 ? 'twitter_vip_t1' : 'twitter_vip_t2';\n  else if (tweet._source === 'tr') sourceName = 'twitter_tr';\n\n  signals.push({\n    source_type: 'twitter',\n    source_name: sourceName,\n    niche: accInfo.niche || 'ai',\n    title: text.replace(/\\n/g, ' ').substring(0, 120),\n    url,\n    raw_data: {\n      tweet_id: String(tweetId),\n      tweet_text: text,\n      author_username: username,\n      author_name: tweet.xDisplayName || tweet.author?.name || '',\n      followers_count: tweet.xFollowersCount || 0,\n      like_count: tweet.likeCount || 0,\n      retweet_count: tweet.retweetCount || 0,\n      reply_count: tweet.replyCount || 0,\n      view_count: tweet.viewCount || 0,\n      tweet_created_at: rawDate,\n      tier: accInfo.tier || 3,\n      category: accInfo.category || 'community',\n      region: accInfo.region || 'Global'\n    },\n    status: 'pending',\n    batch_id: batchId\n  });\n}\n\nconsole.log(`After normalize + dedup: ${signals.length} signals (from ${allTweets.length} raw)`);\n\nreturn [{ json: {\n  signals,\n  totalRaw: allTweets.length,\n  totalDeduped: signals.length,\n  batchId\n} }];"
+      },
+      "id": "09-normalize",
+      "name": "Normalize + Dedup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1630, 400]
+    },
+
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "" },
+          "conditions": [
+            {
+              "id": "has-signals",
+              "leftValue": "={{ $json.totalDeduped }}",
+              "rightValue": "0",
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "10-if-signals",
+      "name": "Has Signals?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1880, 400]
+    },
+
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ═══ Supabase Batch INSERT ═══\n\nconst SB_URL = $env.SUPABASE_URL;\nconst SB_KEY = $env.SUPABASE_SERVICE_KEY;\nconst BATCH_SIZE = 50;\n\nconst { signals, totalRaw, totalDeduped, batchId } = $input.first().json;\nlet totalInserted = 0;\n\nfor (let i = 0; i < signals.length; i += BATCH_SIZE) {\n  const batch = signals.slice(i, i + BATCH_SIZE);\n  try {\n    await $helpers.httpRequest({\n      method: 'POST',\n      url: `${SB_URL}/rest/v1/raw_signals`,\n      headers: {\n        'apikey': SB_KEY,\n        'Authorization': `Bearer ${SB_KEY}`,\n        'Content-Type': 'application/json',\n        'Prefer': 'resolution=ignore-duplicates,return=minimal'\n      },\n      body: batch\n    });\n    totalInserted += batch.length;\n    console.log(`Batch ${Math.floor(i/BATCH_SIZE)+1}: ${batch.length} inserted`);\n  } catch (e) {\n    if (e.message?.includes('409') || e.message?.includes('duplicate')) {\n      console.log(`Batch ${Math.floor(i/BATCH_SIZE)+1}: duplicates, skipped`);\n    } else {\n      console.log(`Insert error: ${e.message}`);\n    }\n  }\n}\n\nconsole.log(`Inserted: ${totalInserted} / ${signals.length}`);\n\nreturn [{ json: {\n  inserted: totalInserted,\n  totalRaw,\n  totalDeduped,\n  batchId\n} }];"
+      },
+      "id": "11-supabase-insert",
+      "name": "Supabase Insert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2140, 300]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.typehype.io/api/trends/process-signals",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Cron-Secret", "value": "={{ $env.CRON_SECRET }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "options": { "timeout": 120000 }
+      },
+      "id": "12-trigger-process",
+      "name": "Trigger Process Signals",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2400, 300]
+    },
+
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ═══ Success Summary ═══\nconst insertData = $('Supabase Insert').first().json;\nconst processData = $input.first().json;\n\nreturn [{ json: {\n  pipeline: 'twitter_radar',\n  status: 'success',\n  timestamp: new Date().toISOString(),\n  signals_inserted: insertData?.inserted || 0,\n  total_raw: insertData?.totalRaw || 0,\n  total_deduped: insertData?.totalDeduped || 0,\n  batch_id: insertData?.batchId || null,\n  process_response: typeof processData === 'object' ? processData : { raw: String(processData) }\n} }];"
+      },
+      "id": "13-summary-ok",
+      "name": "Summary (Success)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2660, 300]
+    },
+
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ═══ No Signals Summary ═══\nreturn [{ json: {\n  pipeline: 'twitter_radar',\n  status: 'no_signals',\n  timestamp: new Date().toISOString(),\n  message: 'No new tweets found after filtering'\n} }];"
+      },
+      "id": "14-summary-empty",
+      "name": "Summary (No Data)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2140, 550]
+    }
+  ],
+
+  "connections": {
+    "Schedule (5x/day)": {
+      "main": [[{ "node": "Fetch Watch Accounts", "type": "main", "index": 0 }]]
+    },
+    "Fetch Watch Accounts": {
+      "main": [[{ "node": "Prepare Search Groups", "type": "main", "index": 0 }]]
+    },
+    "Prepare Search Groups": {
+      "main": [[
+        { "node": "Xquik VIP Search", "type": "main", "index": 0 },
+        { "node": "Xquik TR Search", "type": "main", "index": 0 },
+        { "node": "Xquik Keyword Search", "type": "main", "index": 0 }
+      ]]
+    },
+    "Xquik VIP Search": {
+      "main": [[{ "node": "Merge VIP + TR", "type": "main", "index": 0 }]]
+    },
+    "Xquik TR Search": {
+      "main": [[{ "node": "Merge VIP + TR", "type": "main", "index": 1 }]]
+    },
+    "Merge VIP + TR": {
+      "main": [[{ "node": "Merge All Tweets", "type": "main", "index": 0 }]]
+    },
+    "Xquik Keyword Search": {
+      "main": [[{ "node": "Merge All Tweets", "type": "main", "index": 1 }]]
+    },
+    "Merge All Tweets": {
+      "main": [[{ "node": "Normalize + Dedup", "type": "main", "index": 0 }]]
+    },
+    "Normalize + Dedup": {
+      "main": [[{ "node": "Has Signals?", "type": "main", "index": 0 }]]
+    },
+    "Has Signals?": {
+      "main": [
+        [{ "node": "Supabase Insert", "type": "main", "index": 0 }],
+        [{ "node": "Summary (No Data)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Supabase Insert": {
+      "main": [[{ "node": "Trigger Process Signals", "type": "main", "index": 0 }]]
+    },
+    "Trigger Process Signals": {
+      "main": [[{ "node": "Summary (Success)", "type": "main", "index": 0 }]]
+    }
+  },
+
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 600
+  },
+  "staticData": null,
+  "tags": [{ "name": "type-hype" }, { "name": "twitter" }],
+  "triggerCount": 1,
+  "pinData": {}
+}

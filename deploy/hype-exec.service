@@ -1,0 +1,34 @@
+[Unit]
+Description=Hype C-Suite Executive Daemon (Phase 26)
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=hype
+Group=hype
+WorkingDirectory=/opt/hype-exec
+EnvironmentFile=/opt/hype-exec/.env
+ExecStart=/opt/hype-exec/.venv/bin/python -m hype_exec.main
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+KillSignal=SIGTERM
+MemoryMax=1G
+MemoryHigh=768M
+CPUQuota=200%
+TasksMax=256
+OOMScoreAdjust=-100
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/hype-exec/logs /opt/hype-exec/state
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hype-exec
+
+[Install]
+WantedBy=multi-user.target

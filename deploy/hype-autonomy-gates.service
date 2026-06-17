@@ -1,0 +1,22 @@
+[Unit]
+Description=Hype Crew Autonomy Gates Check (Phase 43.D)
+After=network-online.target contentfactory.service
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+ExecStart=/usr/bin/flock -n /var/lock/hype-autonomy-gates.lock /opt/hype-crew/venv/bin/python -m scripts.check_autonomy_gates
+# Phase 43.D — chain the Edit Elevation scanner after gates so they
+# share a single daily cron slot. If the scanner fails (non-zero), the
+# autonomy unlock booleans are still committed; we don't want a flaky
+# scanner to block the gate work that already finished.
+ExecStartPost=-/usr/bin/flock -n /var/lock/hype-edit-elevations.lock /opt/hype-crew/venv/bin/python -m scripts.scan_edit_elevations
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target

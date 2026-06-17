@@ -1,0 +1,15 @@
+[Unit]
+Description=Trigger Hype Trend Fetch every 4 hours
+After=network-online.target
+
+[Timer]
+# 00:30, 04:30, 08:30, 12:30, 16:30, 20:30 UTC — offset 30 min from the
+# external Hetzner crontab (00, 04, 08, 12, 16, 20) so the two paths
+# don't fire on the same minute (no double-billing). Either path alone
+# keeps Cansu supplied; together they're belt-and-suspenders.
+OnCalendar=*-*-* 00,04,08,12,16,20:30:00 UTC
+Persistent=true
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

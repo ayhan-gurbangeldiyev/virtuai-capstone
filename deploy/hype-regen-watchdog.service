@@ -1,0 +1,18 @@
+[Unit]
+Description=Hype Crew Regen Watchdog (Phase 43.B.5) — recovers stuck regen_pending drafts
+After=network-online.target contentfactory.service
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+# flock so a slow watchdog pass can't double up if the timer fires again.
+ExecStart=/usr/bin/flock -n /var/lock/hype-regen-watchdog.lock /opt/hype-crew/venv/bin/python -m scripts.regen_watchdog
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target

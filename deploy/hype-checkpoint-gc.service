@@ -1,0 +1,16 @@
+[Unit]
+Description=LangGraph checkpoint GC — terminal + eski thread'leri prune (bloat kontrolü)
+After=network-online.target hype-crew.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+ExecStart=/opt/hype-crew/venv/bin/python -m scripts.lg_checkpoint_gc
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

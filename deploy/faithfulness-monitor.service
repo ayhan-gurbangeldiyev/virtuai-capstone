@@ -1,0 +1,12 @@
+[Unit]
+Description=Faithfulness gate σ-band rolling-metrics monitor
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+ExecStart=/opt/hype-crew/venv/bin/python scripts/faithfulness_monitor.py
+StandardOutput=journal
+StandardError=journal

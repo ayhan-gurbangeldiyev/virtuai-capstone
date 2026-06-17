@@ -1,0 +1,10 @@
+[Unit]
+Description=Hype Exec — LangGraph checkpoint cleanup (>30d)
+
+[Service]
+Type=oneshot
+User=hype
+WorkingDirectory=/opt/hype-exec
+ExecStart=/opt/hype-exec/.venv/bin/python -m hype_exec.scripts.cleanup_checkpoints
+StandardOutput=journal
+StandardError=journal

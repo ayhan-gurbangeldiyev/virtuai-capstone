@@ -1,0 +1,46 @@
+name: RSS Fetcher (Type Hype Pipeline)
+
+on:
+  # RSS devre dışı: XQuik batch + Radar ile değiştirildi (2026-04-07)
+  # Eski cron: '0 0,4,8,12,16,20 * * *'
+  workflow_dispatch:
+    inputs:
+      cutoff_hours:
+        description: 'Cutoff hours (default: 6)'
+        required: false
+        default: '6'
+      dry_run:
+        description: 'Dry run (parse only, no DB write)'
+        required: false
+        type: boolean
+        default: false
+      max_feeds:
+        description: 'Max feeds to process (0 = all)'
+        required: false
+        default: '0'
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run RSS Fetcher
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          python rss_fetcher.py \
+            --cutoff-hours ${{ github.event.inputs.cutoff_hours || '6' }} \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }} \
+            ${{ github.event.inputs.max_feeds != '0' && github.event.inputs.max_feeds && format('--max-feeds {0}', github.event.inputs.max_feeds) || '' }}

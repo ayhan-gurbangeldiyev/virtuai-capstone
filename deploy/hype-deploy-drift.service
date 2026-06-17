@@ -1,0 +1,16 @@
+[Unit]
+Description=Deploy drift check — prod md5 vs git HEAD + file mtime vs service start
+After=network-online.target contentfactory.service hype-crew.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hype-crew
+EnvironmentFile=/opt/hype-crew/.env
+ExecStart=/opt/hype-crew/venv/bin/python -m scripts.deploy_drift_check --once
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=60
+
+[Install]
+WantedBy=multi-user.target
