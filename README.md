@@ -1,254 +1,83 @@
-<p align="center">
-  <img src="mascot/maskot_nobg.png" alt="TypeHype Mascot" width="160" />
-</p>
+# VirtuAI: TypeHype
 
-<h1 align="center">TypeHype — ContentFactory</h1>
+VirtuAI is a Bahçeşehir University capstone project. TypeHype is the application developed within it. The project addresses the coordination of trend research, content planning, generation, review and publishing for a virtual persona.
 
-<!-- SİSTEM KILAVUZU: tüm sistemin ne/nerede/nasıl çalıştığı (mimari, flow, ajanlar,
-     LLM kullanım haritası, LangGraph, servisler, şema) → SYSTEM_GUIDE.md. Repo analizi/
-     raporu için ÖNCE bunu oku. Ölü modüller → docs/DEPRECATED_MODULES.md. -->
-<p align="center"><strong>📘 Sistem kılavuzu (ne/nerede/nasıl çalışıyor): <a href="SYSTEM_GUIDE.md">SYSTEM_GUIDE.md</a></strong> — mimari, içerik akışı, ajanlar, LLM kullanım haritası, LangGraph, servisler, Supabase şema. <em>Repo analizi/raporu için önce bunu oku.</em></p>
-<p align="center"><em>Ölü/kullanılmayan modüller → <a href="docs/DEPRECATED_MODULES.md">docs/DEPRECATED_MODULES.md</a> — @deprecated işaretli dosyalar aktif akışın parçası DEĞİL.</em></p>
+Developed by a three-person team, the project combines agent workflows with a web application and publishing integrations. My contributions focused on service architecture and agent orchestration. See the [VirtuAI case study](https://ayhangurbangeldiyev.com/work/virtuai) for further context.
 
-<p align="center">
-  <strong>AI-Powered Content Intelligence Platform</strong><br/>
-  Real-time trend detection, AI content generation, and social media optimization — all in one platform.
-</p>
+## Capabilities
 
-<p align="center">
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" />
-  <img src="https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
-  <img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white" />
-  <img src="https://img.shields.io/badge/GPT--4o-412991?style=flat-square&logo=openai&logoColor=white" />
-</p>
-
----
-
-## What is TypeHype?
-
-TypeHype is a full-stack AI content platform that:
-
-1. **Detects trends** — Monitors 55+ RSS feeds and Twitter/X accounts using a 2-layer pipeline (GitHub Actions + FastAPI)
-2. **Analyzes with AI** — GPT-4o-mini scores, clusters, and categorizes signals into actionable trends
-3. **Generates content** — Produces platform-optimized content (tweets, threads, LinkedIn posts, blog drafts) with style fingerprinting
-4. **Optimizes for engagement** — X/Twitter algorithm scoring, A/B variant generation, and competitor analysis via Xquik API
-5. **Exposes via MCP** — 14-tool MCP server for AI agent integration (Claude, etc.)
-
----
+- A React interface and FastAPI backend for trend and content workflows
+- Sequential CrewAI agents for trend selection and content planning
+- Style-example retrieval using vector similarity and additional ranking signals
+- Account-scoped agent memory with a semantic-recall integration
+- Draft review and a guarded Postiz integration for scheduling content
+- An MCP endpoint exposing selected application tools
 
 ## Architecture
 
-```
-                    ┌──────────────────────────────────────────────┐
-                    │              TypeHype Platform               │
-                    └──────────────────────────────────────────────┘
-
-  ┌─────────────────────┐        ┌──────────────────────────────────────┐
-  │  GitHub Actions      │        │  FastAPI Backend (Hetzner VPS)       │
-  │  (6x/day cron)       │        │                                      │
-  │                      │        │  24 route modules · 32 prompt        │
-  │  RSS Fetcher         │        │  builders · 10-layer security        │
-  │  55+ feeds ──────────│──>     │                                      │
-  │  Parse · Normalize   │  raw   │  Trend Engine ──> AI Analysis        │
-  │  Batch INSERT        │ signals│  Twitter Fetch ──> Scoring           │
-  │  Feed health check   │        │  Content Gen  ──> Style Lab          │
-  └─────────────────────┘        │                                      │
-                                  │  MCP Server (14 tools, JSON-RPC 2.0) │
-  ┌─────────────────────┐        │  REST API (135+ endpoints)           │
-  │  Scheduled Cron      │        └───────────────┬──────────────────────┘
-  │  (5x/day)            │──> POST /auto-refresh   │
-  └─────────────────────┘                          │
-                                                    │
-  ┌─────────────────────┐        ┌─────────────────┴────────────────────┐
-  │  React 19 Frontend   │<──────│  Supabase (PostgreSQL + pgvector)    │
-  │  Vercel · Tailwind   │       │  20 tables · RLS · Real-time         │
-  │  Radix UI · i18n     │       │  Auth · Storage                      │
-  │  24 pages            │       └──────────────────────────────────────┘
-  └─────────────────────┘
+```text
+Trend signals + account context     Style examples + agent memory
+              |                                  |
+              v                                  v
+  CrewAI: TrendScout -> Planner <--------- Retrieval and context
+              |
+              v
+  Content generation -> compliance checks
+              |
+              +--> optional visual / video steps
+              |
+              +--> dry run / skip / failure
+              |
+              +--> draft review or configured publishing via Postiz
 ```
 
----
+The CrewAI crew runs two sequential tasks: TrendScout selects a trend and Planner prepares the content brief. The surrounding flow handles generation, compliance checks and publishing so the crew can focus on selection and planning.
 
-## Features
+An optional LangGraph execution path wraps the content flow in a state graph with checkpoint and resume support. It is enabled through configuration and is not used for every run. A separate executive graph coordinates role-based decisions and can interrupt for human approval.
 
-| Module | Description |
-|--------|-------------|
-| **Trend Dashboard** | Real-time AI trend feed with category filters, scores, and sources |
-| **Content Studio** | AI-powered tweet/thread/post generator with tone & style controls |
-| **Style Lab** | 50+ dimension style fingerprinting with DNA analysis |
-| **Creator Hub** | Multi-platform content management with draft/publish workflow |
-| **AI Coach** | Personalized content strategy recommendations |
-| **X Analytics** | Account analysis, engagement metrics, viral pattern detection |
-| **MCP Server** | 14 tools for AI agent integration (trends, scoring, generation) |
+Style retrieval embeds the topic and searches stored examples by vector similarity. It can also combine similarity with engagement and other ranking signals. Agent memory is a separate integration. The planner can query account-scoped memory through a semantic-recall tool.
 
----
+Review and publishing behavior depends on configuration. The publishing wrapper checks gate outcomes before scheduling. Non-UI publishing requires an explicit configuration override. The RSS GitHub Actions workflow supports manual dispatch. Its former schedule is disabled.
 
-## Tech Stack
+## Technology
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | React 19, Tailwind CSS, Radix UI, Framer Motion, Recharts, i18next |
-| **Backend** | Python, FastAPI, Uvicorn |
-| **Database** | Supabase (PostgreSQL + pgvector), Row Level Security |
-| **AI Models** | GPT-4o (content), GPT-4o-mini (analysis), GPT-4.1-nano (fallback) |
-| **APIs** | Xquik (Twitter/X data), YouTube Data API |
-| **Hosting** | Vercel (frontend), Hetzner VPS (backend), GitHub Actions (RSS) |
-| **Auth** | Supabase Auth with email whitelist |
+| Responsibility | Technologies |
+| --- | --- |
+| Frontend | React, React Router, Supabase client |
+| Backend and APIs | Python, FastAPI, MCP |
+| Agent orchestration | CrewAI, optional LangGraph execution path |
+| Database and retrieval | Supabase, PostgreSQL, pgvector |
+| Integrations | Postiz, Xquik |
+| Development and testing | pytest, GitHub Actions |
 
----
+## Repository guide
 
-## Project Structure
+- [`frontend/`](frontend/): interface and client-side application
+- [`backend/`](backend/): API, services, migrations and tests
+- [`hype_crew/`](hype_crew/): content agents, flow, memory tools and tests
+- [`hype_exec/`](hype_exec/): separate executive graph and tests
+- [`deploy/`](deploy/): service and timer definitions
+- [`n8n/`](n8n/): workflow artifacts
+- [`docs/`](docs/): technical documentation
 
-```
-ContentFactory/
-├── backend/
-│   ├── routes/           # 24 API route modules
-│   ├── services/         # Business logic (trend engine, xquik client, etc.)
-│   ├── middleware/        # 10-layer security stack
-│   ├── prompts/          # 32 AI prompt builders
-│   ├── migrations/       # SQL migration files
-│   ├── config/           # RSS feeds config
-│   ├── tests/            # Test suite
-│   └── server.py         # FastAPI application entry point
-├── frontend/
-│   ├── src/
-│   │   ├── pages/        # 24 page components
-│   │   ├── components/   # Radix UI component library
-│   │   ├── contexts/     # React context providers
-│   │   ├── lib/          # API client, i18n, Supabase
-│   │   ├── locales/      # EN/TR translations
-│   │   └── config/       # Platform configurations
-│   └── public/           # Static assets
-├── docs/
-│   ├── SYSTEM_DOCUMENTATION.md   # Full system documentation (TR)
-│   ├── specs/                    # Feature specifications & plans
-│   └── references/               # Research documents
-├── .github/workflows/
-│   ├── rss-fetcher.yml   # RSS pipeline (6x/day cron)
-│   └── run.yml           # Manual trigger workflow
-├── n8n/                  # Twitter Radar workflow (archived)
-├── mascot/               # Brand mascot assets
-└── memory/               # Product requirements (PRD)
-```
+## Setup and reproducibility
 
----
+The project uses Python, Node.js and a Supabase project. Each workflow also requires configuration for its external services. Backend, content workflow and executive workflow dependencies are listed in separate requirements files. The root requirements file does not provide a complete backend installation.
 
-## Quick Start
+Review the [backend environment example](backend/.env.example), [frontend environment example](frontend/.env.example) and [system guide](SYSTEM_GUIDE.md) before attempting setup. Use an isolated environment and avoid production credentials or live publishing accounts while exploring.
 
-### Prerequisites
+## Tests and limitations
 
-- Python 3.11+
-- Node.js 18+
-- Supabase project ([supabase.com](https://supabase.com))
+Test code is available in [`backend/tests/`](backend/tests/), [`hype_crew/tests/`](hype_crew/tests/) and [`hype_exec/tests/`](hype_exec/tests/). The [faithfulness CI workflow](.github/workflows/faithfulness-ci.yml) defines a structural check and a separate benchmark. The benchmark requires external model access and can be skipped when credentials are unavailable. The repository also contains a [secret-scan workflow](.github/workflows/secret-scan.yml).
 
-### Backend
+These tests and workflows were not executed as part of this README update. Their presence does not establish model performance or current deployment status. A clean end-to-end installation, the full migration sequence and external integrations remain unverified. The repository calls the `match_hype_memory` database function, but its complete SQL definition was not found in the inspected migrations.
 
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r ../requirements.txt
-cp .env.example .env          # Fill in your keys
-uvicorn server:app --reload --port 8000
-```
+## Documentation and rights
 
-### Frontend
+- [System guide](SYSTEM_GUIDE.md)
+- [System documentation](docs/SYSTEM_DOCUMENTATION.md)
+- [Deprecated modules](docs/DEPRECATED_MODULES.md)
+- [Project roadmap](docs/specs/ROADMAP.md)
+- [Product requirements](memory/PRD.md)
 
-```bash
-cd frontend
-npm install
-cp .env.example .env          # Fill in your keys
-npm start                     # http://localhost:3000
-```
-
----
-
-## MCP Server
-
-TypeHype exposes a **Model Context Protocol** server for AI agent integration.
-
-**Endpoint:** `POST /api/mcp` (Streamable HTTP, JSON-RPC 2.0)
-
-| Tool | Description |
-|------|-------------|
-| `get_today_trends` | Top trends (24h, category/score filter) |
-| `get_day_recap` | Daily summary with stats |
-| `get_trending_by_category` | Grouped by category |
-| `search_trends` | Full-text search (7-30 day range) |
-| `get_twitter_trends` | Live Twitter/X trends |
-| `score_tweet` | Algorithm score (0-100) with tips |
-| `refine_tweet` | AI improvement suggestions |
-| `generate_tweet` | Generate variants with auto-scoring |
-| `analyze_account` | Engagement stats & content analysis |
-| `get_viral_patterns` | Top vs bottom performance comparison |
-| `compare_accounts` | Side-by-side account analysis |
-| `repurpose_content` | Cross-platform content adaptation |
-| `get_pipeline_health` | System health check |
-| `trigger_manual_run` | Manual pipeline refresh |
-
-**Auth:** Bearer token in `Authorization` header.
-
----
-
-## API Overview
-
-The backend exposes **135+ REST endpoints** across 24 route modules:
-
-| Module | Prefix | Key Endpoints |
-|--------|--------|---------------|
-| Trends | `/api/trends` | CRUD, auto-refresh, health, process-signals |
-| Content | `/api/generate` | Tweet, thread, LinkedIn post generation |
-| Style | `/api/style` | DNA analysis, fingerprinting, palette |
-| Profile | `/api/profile` | User profile, settings, onboarding |
-| Sources | `/api/sources` | RSS feeds, Twitter accounts management |
-| Analytics | `/api/analytics` | Account analysis, viral patterns |
-| MCP | `/api/mcp` | Model Context Protocol server |
-
-Full API reference: [`docs/SYSTEM_DOCUMENTATION.md`](docs/SYSTEM_DOCUMENTATION.md)
-
----
-
-## Security
-
-The backend implements a **10-layer security middleware stack**:
-
-1. Authentication (JWT + email whitelist)
-2. CSRF Protection
-3. Rate Limiting (per-endpoint)
-4. Input Sanitization
-5. Replay Attack Protection
-6. Request Size Limiting
-7. Security Headers (HSTS, CSP, X-Frame)
-8. Suspicious UA Blocking
-9. Token Usage Tracking
-10. CORS Policy
-
----
-
-## Environment Variables
-
-See [`backend/.env.example`](backend/.env.example) and [`frontend/.env.example`](frontend/.env.example) for required configuration.
-
-**GitHub Actions Secrets** (for RSS pipeline):
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_KEY`
-
----
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [`docs/SYSTEM_DOCUMENTATION.md`](docs/SYSTEM_DOCUMENTATION.md) | Complete system documentation (Turkish) |
-| [`docs/specs/ROADMAP.md`](docs/specs/ROADMAP.md) | Product roadmap |
-| [`docs/specs/`](docs/specs/) | Feature specifications and plans |
-| [`docs/references/`](docs/references/) | Algorithm research and prompt guides |
-| [`memory/PRD.md`](memory/PRD.md) | Product Requirements Document |
-
----
-
-## License
-
-Private project. All rights reserved.
+All rights reserved. No open-source license is currently provided in this repository. Contact the project maintainers regarding reuse or redistribution.
